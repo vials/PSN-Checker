@@ -1,35 +1,15 @@
-import urllib2, time, sys
+import requests
 
-def main():
-    print('*'*37)
-    print('+       Inc\'s PSN Name Checker      +')
-    print('*'*37)
-
-    word = raw_input('Please Enter A PSN Name: ')
-
-    req = urllib2.Request('https://io.playstation.com/playstation/psn/profile/public/userData?onlineId=' + word)
-    req.add_header('Referer', 'https://www.playstation.com/en-us/my/public-trophies')
-    req.add_header('Origin', 'https://www.playstation.com')
-    resp = urllib2.urlopen(req)
-    content = resp.read()
-
-    if "handle" not in content:
-        print('Account Available: ' + word)
-    else:
-        print('Account Taken: '+word)
-
-    retry = raw_input('Would You Like To Check Another Account (Y/N)?: ')
-
-    if retry == 'y' or retry == 'Y':
-        main()
-    elif retry == 'n' or retry == 'N':
-        Exit()
-
-def Exit():
-        print('Script Is Shutting Down In 3 Seconds')
-        time.sleep(3)
-        sys.exit("Thanks For Using My Script!\n~Inc")
-
-
-if __name__ == '__main__':
-    main()
+username = input("Enter Online ID: ")
+try:
+	response = requests.post('https://accounts.api.playstation.com/api/v1/accounts/onlineIds', json={"onlineId": username, "reserveIfAvailable": False})
+except Exception as e:
+	print(str(e))
+	pass
+if response.status_code == 400:
+	print("Username: ["+username+"] Taken")
+elif response.status_code == 201:
+	print("Username: ["+username+"] Available")
+else:
+	print(response.status_code)
+	print(response.content)
